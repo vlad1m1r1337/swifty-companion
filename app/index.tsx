@@ -2,63 +2,57 @@ import { View } from "react-native";
 import { Text, TouchableOpacity, Linking } from 'react-native';
 import {useEffect, useState} from "react";
 import axios from "axios";
+import qs from "qs";
+
 
 export default function Index() {
-    const [token, setToken] = useState();
-    const [user, setUser] = useState();
-    const openLink = () => {
-        Linking.openURL('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-804f63516c5607775b597ed31ec614b4e48ab5861242432e3a31d7056409cc7c&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2F&response_type=code');
-    };
-    const client_id = process.env.EXPO_PUBLIC_CLIENT_ID;
-    const client_secret = process.env.EXPO_PUBLIC_CLIENT_SECRET;
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get("code");
-        if (!code) return;
-        const fetchToken = async () => {
-            try {
-                const formData = new URLSearchParams();
-                formData.append("grant_type", "authorization_code");
-                formData.append("client_id", client_id || '');
-                formData.append("client_secret", client_secret || '');
-                formData.append("code", code || "");
-                formData.append("redirect_uri", "http://localhost:8081/");
 
-                const res = await axios.post("https://api.intra.42.fr/oauth/token", formData, {
+    const UID = process.env.EXPO_PUBLIC_CLIENT_ID;
+    const SECRET = process.env.EXPO_PUBLIC_CLIENT_SECRET;
+    const [token, setToken] = useState()
+    useEffect(() => {
+        async function getAccessToken() {
+            const tokenUrl = "https://api.intra.42.fr/oauth/token";
+            const data = qs.stringify({
+                grant_type: "client_credentials",
+                client_id: UID,
+                client_secret: SECRET,
+            });
+
+            try {
+                const response = await axios.post(tokenUrl, data, {
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                });
+                setToken(response.data.access_token);
+                console.log("Access Token:", response.data.access_token);
+                return response.data.access_token;
+            } catch (error) {
+                console.error("Error fetching token:", error.response?.data || error.message);
+            }
+        }
+
+        getAccessToken();
+    }, []);
+    useEffect(() => {
+        async function getCursusData() {
+            if(!token) return;
+            try {
+                const response = await axios.get("https://api.intra.42.fr/v2/users/vgribkov", {
                     headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
+                        Authorization: `Bearer ${token}`,
                     },
                 });
 
-                console.log(res.data.access_token);
-                setToken(res.data.access_token);
-            } catch (e) {
-                console.error("Ошибка при получении токена:", e);
+                console.log("Cursus Data:", response.data);
+                return response.data;
+            } catch (error) {
+                console.error("Error fetching cursus data:", error.response?.data || error.message);
             }
-        };
-        fetchToken();
-
-    }, []);
-    useEffect(() => {
-        if(token) {
-            const fetchMe = async () => {
-                try {
-                    const res = await axios.get("https://api.intra.42.fr/v2/me", {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-
-                    console.log(res.data);
-                    setUser(res.data);
-                } catch (e) {
-                    console.error("Ошибка при получении токена:", e);
-                }
-            }
-
-            fetchMe();
         }
+
+        getCursusData();
     }, [token]);
+
     return (
         <>
             <View
@@ -69,14 +63,11 @@ export default function Index() {
                 }}
             >
                 <Text>Edit app/index.tsx to edit this screen.</Text>
-                <TouchableOpacity onPress={openLink}>
-                    <Text style={{ color: 'blue' }}>Registr</Text>
-                </TouchableOpacity>
             </View>
             <View>
-                <Text>{user?.login}</Text>
-                <Text>{user?.email}</Text>
-                <Text>{user?.phone}</Text>
+                {/*<Text>{user?.login}</Text>*/}
+                {/*<Text>{user?.email}</Text>*/}
+                {/*<Text>{user?.phone}</Text>*/}
             </View>
         </>
     );
