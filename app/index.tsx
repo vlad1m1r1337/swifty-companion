@@ -1,41 +1,37 @@
 import {Button, Image, StyleSheet, TextInput, View} from "react-native";
-import { Text, TouchableOpacity, Linking } from 'react-native';
-import {useEffect, useState} from "react";
-import axios from "axios";
-import qs from "qs";
-import getUserData from "@/app/get-user-data";
+import { Text } from 'react-native';
+import {FC, useState} from "react";
+import axios, { AxiosError } from "axios";
+import {User} from "@/app/types/user";
 
+type IndexProps = {
+    user: User | undefined;
+    token: string | undefined;
+    setUser: (user: User | undefined) => void;
+}
 
-export default function Index() {
-    const UID = process.env.EXPO_PUBLIC_CLIENT_ID;
-    const SECRET = process.env.EXPO_PUBLIC_CLIENT_SECRET;
-    const [token, setToken] = useState();
-    const [user, setUser] = useState();
+export const Index: FC<IndexProps> = ({ user, token, setUser }) => {
     const [text, onChangeText] = useState('');
-    useEffect(() => {
-        async function getAccessToken() {
-            const tokenUrl = "https://api.intra.42.fr/oauth/token";
-            const data = qs.stringify({
-                grant_type: "client_credentials",
-                client_id: UID,
-                client_secret: SECRET,
-            });
 
-            try {
-                const response = await axios.post(tokenUrl, data, {
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                });
-                setToken(response.data.access_token);
-                return response.data.access_token;
-            } catch (error) {
-                console.error("Error fetching token:", error.response?.data || error.message);
+    async function getUserData(user: string): Promise<User | undefined> {
+        if(!token) return;
+        try {
+            const response = await axios.get(`https://api.intra.42.fr/v2/users/${user}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setUser(response.data);
+            console.log(response.data);
+            return response.data;
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                console.error("Error fetching cursus data:", error.response?.data || error.message);
+            } else {
+                console.error("Unexpected error:", error);
             }
         }
-
-        if(token) return;
-        getAccessToken();
-    }, [token]);
-
+    }
     return (
         <>
             <View
@@ -55,11 +51,13 @@ export default function Index() {
                 <Image source={{uri: user?.image.link}}
                        style={styles.userImg} />
                 <View>
-                    <Text>{user?.last_name}</Text>
-                    <Text>{user?.first_name}</Text>
+                    <Text>{user?.usual_full_name}</Text>
                 </View>
                 <Text>{user?.email}</Text>
                 <Text>{user?.phone}</Text>
+                <Text>{user?.wallet}</Text>
+                {user?.location ? (<Text>{user?.location}</Text>) : (<Text>Location is unknown</Text>)}
+                <Text>{user?.cursus_users[1].level}</Text>
             </View>
         </>
     );
