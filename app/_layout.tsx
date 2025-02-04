@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {User} from "@/app/types/user";
 import qs from "qs";
 import axios, {AxiosError} from "axios";
+import {colors} from "@/app/constants";
 
 const Tab = createBottomTabNavigator();
 
@@ -47,19 +48,22 @@ export default function RootLayout() {
       <Tab.Navigator
           initialRouteName="Index"
           screenOptions={{
-            tabBarActiveTintColor: 'tomato',
-            tabBarInactiveTintColor: 'gray',
+            tabBarStyle: {
+              backgroundColor: colors.secondaryBackground,
+            },
+            tabBarActiveTintColor: colors.primaryPurple,
+            tabBarInactiveTintColor: 'white',
           }}
       >
           <Tab.Screen
               name="Index"
-              options={{ tabBarLabel: "Домашняя", headerShown: false }}
+              options={{ tabBarLabel: "Main", headerShown: false }}
           >
               {(props) => <Index {...props} token={token} setUser={setUser} user={user} />}
           </Tab.Screen>
         <Tab.Screen
             name="MoreInfo"
-            options={{ tabBarLabel: 'Подробнее', headerShown: false }}
+            options={{ tabBarLabel: 'Other Info', headerShown: false }}
         >
             {(props) => <MoreInfo {...props} user={user} />}
         </Tab.Screen>
