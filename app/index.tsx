@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, Linking } from 'react-native';
 import {useEffect, useState} from "react";
 import axios from "axios";
 import qs from "qs";
+import getUserData from "@/app/get-user-data";
 
 
 export default function Index() {
@@ -10,7 +11,7 @@ export default function Index() {
     const SECRET = process.env.EXPO_PUBLIC_CLIENT_SECRET;
     const [token, setToken] = useState();
     const [user, setUser] = useState();
-    const [text, onChangeText] = useState('Text');
+    const [text, onChangeText] = useState('');
     useEffect(() => {
         async function getAccessToken() {
             const tokenUrl = "https://api.intra.42.fr/oauth/token";
@@ -34,29 +35,11 @@ export default function Index() {
         if(token) return;
         getAccessToken();
     }, [token]);
-    async function getCursusData(user: string) {
-        if(!token) return;
-        try {
-            const response = await axios.get(`https://api.intra.42.fr/v2/users/${user}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setUser(response.data);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching cursus data:", error.response?.data || error.message);
-        }
-    }
 
     return (
         <>
             <View
-                style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
+                style={styles.container}
             >
                 <TextInput
                     onChangeText={onChangeText}
@@ -64,17 +47,33 @@ export default function Index() {
                     placeholder="Write login"
                 />
                 <Button
-                    onPress={() => getCursusData(text)}
-                    title="Learn More"
+                    onPress={() => getUserData(text)}
+                    title="Find by nickname"
                     color="#841584"
-                    accessibilityLabel="Learn more about this purple button"
+                    accessibilityLabel="Find by nickname"
                 />
-                <Text>{user?.login}</Text>
-                <Text>{user?.last_name}</Text>
-                <Text>{user?.first_name}</Text>
                 <Image source={{uri: user?.image.link}}
-                       style={{width: 400, height: 400}} />
+                       style={styles.userImg} />
+                <View>
+                    <Text>{user?.last_name}</Text>
+                    <Text>{user?.first_name}</Text>
+                </View>
+                <Text>{user?.email}</Text>
+                <Text>{user?.phone}</Text>
             </View>
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    userImg: {
+        width: 200,
+        height: 200,
+    }
+});
