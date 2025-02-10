@@ -1,38 +1,27 @@
-import {Button, Image, StyleSheet, TextInput, TouchableOpacity, View} from "react-native";
+import { Image, StyleSheet, TextInput, TouchableOpacity, View, Dimensions} from "react-native";
 import { Text } from 'react-native';
 import {FC, useState} from "react";
 import axios, { AxiosError } from "axios";
 import {User} from "@/app/types/user";
 import {colors} from "@/app/constants";
+import {getAccessToken} from "@/app/requests/get-access-token";
+import {getUserData} from "@/app/requests";
 
 type IndexProps = {
     user: User | undefined;
     token: string | undefined;
     setUser: (user: User | undefined) => void;
+    setToken: (token: string | undefined) => void;
 }
 
-export const Index: FC<IndexProps> = ({ user, token, setUser }) => {
+export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
     const [text, onChangeText] = useState('');
-
-    async function getUserData(user: string): Promise<User | undefined> {
-        if(!token) return;
-        try {
-            const response = await axios.get(`https://api.intra.42.fr/v2/users/${user}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setUser(response.data);
-            console.log(response.data);
-            return response.data;
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                console.error("Error fetching cursus data:", error.response?.data || error.message);
-            } else {
-                console.error("Unexpected error:", error);
-            }
+    const fetchUser = async () => {
+        const userData = await getUserData(text); // ✅ Ожидаем результат
+        if (userData) {
+            setUser(userData);
         }
-    }
+    };
     return (
         <>
             <View
@@ -45,60 +34,35 @@ export const Index: FC<IndexProps> = ({ user, token, setUser }) => {
                     placeholderTextColor={colors.primaryPurple}
                     style={styles.input}
                 />
-                <TouchableOpacity onPress={() => getUserData(text)} style={styles.button}>
+                <TouchableOpacity onPress={() => fetchUser()} style={styles.button}>
                     <Text style={styles.buttonText}>Find by nickname</Text>
                 </TouchableOpacity>
                 {user && (
-                    <>
-                        <Image
-                            source={{ uri: user.image.link }}
-                            style={styles.userImg}
-                        />
-                        {/*<View>*/}
-                        {/*    <View style={styles.infoRow}>*/}
-                        {/*        <Text>Full Name</Text>*/}
-                        {/*        <Text>{user.usual_full_name}</Text>*/}
-                        {/*    </View>*/}
-                        {/*    <View style={styles.infoRow}>*/}
-                        {/*        <Text>Level</Text>*/}
-                        {/*        <Text>{user?.cursus_users[1].level}</Text>*/}
-                        {/*    </View>*/}
-                        {/*    <View style={styles.infoRow}>*/}
-                        {/*        <Text>Email</Text>*/}
-                        {/*        <Text>{user.email}</Text>*/}
-                        {/*    </View>*/}
-                        {/*    <View style={styles.infoRow}>*/}
-                        {/*        <Text>Phone</Text>*/}
-                        {/*        <Text>{user.phone}</Text>*/}
-                        {/*    </View>*/}
-                        {/*    <View style={styles.infoRow}>*/}
-                        {/*        <Text>Location</Text>*/}
-                        {/*        {user?.location ? (<Text>{user?.location}</Text>) : (<Text>Location is unknown</Text>)}*/}
-                        {/*    </View>*/}
-                        {/*    <View style={styles.infoRow}>*/}
-                        {/*        <Text>Wallet</Text>*/}
-                        {/*        <Text>{user?.wallet}</Text>*/}
-                        {/*    </View>*/}
-                        {/*</View>*/}
-                        <View style={{display: 'flex', flexDirection: 'row', width: '200'}}>
-                            <View>
-                                <Text>{user.usual_full_name}</Text>
-                                <Text>{user.cursus_users[1].level}</Text>
-                                <Text>{user.email}</Text>
-                                <Text>{user.phone}</Text>
-                                {user?.location ? (<Text>{user?.location}</Text>) : (<Text>Location is unknown</Text>)}
-                                <Text>{user.wallet}</Text>
-                            </View>
-                            <View>
-                                <Text>Full Name</Text>
-                                <Text>Level</Text>
-                                <Text>Email</Text>
-                                <Text>Phone</Text>
-                                <Text>Location</Text>
-                                <Text>Wallet</Text>
+                        <View style={styles.fullInfo}>
+                            <Image
+                                source={{ uri: user.image.link }}
+                                style={styles.userImg}
+                            />
+                            <View style={styles.info}>
+                                <View style={{marginRight: 10}}>
+                                    <Text style={styles.infoTag}>Full Name</Text>
+                                    <Text style={styles.infoTag}>Level</Text>
+                                    <Text style={styles.infoTag}>Email</Text>
+                                    <Text style={styles.infoTag}>Phone</Text>
+                                    <Text style={styles.infoTag}>Location</Text>
+                                    <Text style={styles.infoTag}>Wallet</Text>
+                                </View>
+                                <View>
+                                    <Text style={styles.infoValue}>{user.usual_full_name}</Text>
+                                    <Text style={styles.infoValue}>{user.cursus_users[1].level}</Text>
+                                    <Text style={styles.infoValue}>{user.email}</Text>
+                                    <Text style={styles.infoValue}>{user.phone}</Text>
+                                    {user?.location ? (<Text style={styles.infoValue} >{user?.location}</Text>) :
+                                        (<Text style={styles.infoValue} >Location is unknown</Text>)}
+                                    <Text style={styles.infoValue} >{user.wallet}</Text>
+                                </View>
                             </View>
                         </View>
-                    </>
                 )}
             </View>
         </>
@@ -114,8 +78,8 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     userImg: {
-        width: 200,
-        height: 200,
+        width: 150,
+        height: 150,
         borderRadius: 20,
         borderColor: colors.primaryPurple,
         borderWidth: 2,
@@ -140,7 +104,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 5,
-        elevation: 5, // Тень на Android
+        elevation: 5,
     },
     button: {
         backgroundColor: colors.primaryPurple,
@@ -156,6 +120,22 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         textAlign: 'center',
+    },
+    fullInfo: {
+        display: 'flex',
+        flexDirection: Dimensions.get('window').width > 600 ? 'row' : 'column',
+        gap: 20,
+        alignItems: 'center'
+    },
+    info: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    infoTag: {
+        color: 'white',
+    },
+    infoValue: {
+        color: colors.primaryPurple
     },
     infoRow: {
         display: 'flex',
