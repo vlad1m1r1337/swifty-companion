@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { User } from "@/app/types/user";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -36,7 +36,6 @@ export async function getAccessToken() {
         });
         const token = response.data.access_token;
         storeData('token', token);
-        console.log("Новый токен получен:", token);
     } catch (error) {
         console.error("Ошибка получения токена:", error);
         return null;
@@ -68,14 +67,12 @@ apiClient.interceptors.response.use(
 // Функция для получения данных пользователя
 export async function getUserData(user: string): Promise<User | undefined> {
     const token = await getData('token');
-    console.log(token);
     try {
         const response = await apiClient.get(`/users/${user}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log("Данные пользователя:", response.data);
         return response.data;
     } catch (error) {
         console.error("Ошибка получения данных пользователя:", error);

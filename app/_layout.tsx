@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import {Index} from "@/app/index";
 import {MoreInfo} from "@/app/more-info";
 import {useEffect, useState} from "react";
@@ -36,7 +36,7 @@ export default function RootLayout() {
       >
           <Tab.Screen
               name="Index"
-              options={{ tabBarLabel: "Main", headerShown: false }}
+              options={{ tabBarLabel: "Main", headerShown: false, tabBarIcon: ({ focused }) => (<></>) }}
           >
               {(props) => <Index
                   {...props}
@@ -48,7 +48,8 @@ export default function RootLayout() {
           </Tab.Screen>
         <Tab.Screen
             name="MoreInfo"
-            options={{ tabBarLabel: 'Other Info', headerShown: false }}
+            options={{tabBarLabel: "More Info", headerShown: false, tabBarIcon: () => (<></>)
+            }}
         >
             {(props) => <MoreInfo {...props} user={user} />}
         </Tab.Screen>

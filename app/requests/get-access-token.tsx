@@ -14,7 +14,6 @@ export async function getAccessToken(setToken: (token: string) => void) {
         const response = await axios.post(tokenUrl, data, {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
-        console.log('res', response.data);
         setToken(response.data.access_token);
         return response.data.access_token;
     } catch (error) {

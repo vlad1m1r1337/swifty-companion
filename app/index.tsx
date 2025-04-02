@@ -1,12 +1,9 @@
-import { Image, StyleSheet, TextInput, TouchableOpacity, View, Dimensions} from "react-native";
+import { Image, StyleSheet, TextInput, TouchableOpacity, View, Dimensions, ScaledSize} from "react-native";
 import { Text } from 'react-native';
-import {FC, useState} from "react";
-import axios, { AxiosError } from "axios";
+import {FC, useEffect, useState} from "react";
 import {User} from "@/app/types/user";
 import {colors} from "@/app/constants";
-import {getAccessToken} from "@/app/requests/get-access-token";
 import {getUserData} from "@/app/requests";
-
 type IndexProps = {
     user: User | undefined;
     token: string | undefined;
@@ -16,8 +13,20 @@ type IndexProps = {
 
 export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
     const [text, onChangeText] = useState('');
+    const [screenDimensions, setScreenDimensions] = useState(Dimensions.get('window'));
+    useEffect(() => {
+        const onChange = ({ window }: { window: ScaledSize }) => {
+            setScreenDimensions(window);
+        };
+
+        const listener = Dimensions.addEventListener('change', onChange);
+
+        return () => listener.remove();
+    }, []);
+
+    const isLandscape = screenDimensions.width > screenDimensions.height;
     const fetchUser = async () => {
-        const userData = await getUserData(text); // ✅ Ожидаем результат
+        const userData = await getUserData(text);
         if (userData) {
             setUser(userData);
         }
@@ -38,7 +47,7 @@ export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
                     <Text style={styles.buttonText}>Find by nickname</Text>
                 </TouchableOpacity>
                 {user && (
-                        <View style={styles.fullInfo}>
+                        <View style={{...styles.fullInfo, flexDirection: isLandscape ? 'row' : 'column'}}>
                             <Image
                                 source={{ uri: user.image.link }}
                                 style={styles.userImg}
@@ -123,9 +132,10 @@ const styles = StyleSheet.create({
     },
     fullInfo: {
         display: 'flex',
-        flexDirection: Dimensions.get('window').width > 600 ? 'row' : 'column',
+        flexDirection: 'row',
         gap: 20,
-        alignItems: 'center'
+        alignItems: 'center',
+        flexWrap: 'wrap',
     },
     info: {
         display: 'flex',
