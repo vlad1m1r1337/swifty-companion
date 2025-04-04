@@ -9,18 +9,17 @@ import { getAccessToken } from "@/app/requests";
 const Tab = createMaterialTopTabNavigator();
 
 export default function RootLayout() {
-    const [token, setToken] = useState<string | undefined>(undefined);
-    const [user, setUser] = useState<User | undefined>();
-
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     useEffect(() => {
         getAccessToken();
     }, [token]);
 
+    // console.log(token)
     return (
         <Tab.Navigator
             initialRouteName="Index"
             screenOptions={{
-                tabBarPosition: 'bottom', // Располагаем вкладки внизу
                 tabBarStyle: {
                     backgroundColor: colors.secondaryBackground,
                     borderColor: colors.secondaryBackground,
@@ -33,7 +32,7 @@ export default function RootLayout() {
                 tabBarActiveTintColor: colors.primaryPurple,
                 tabBarInactiveTintColor: 'white',
                 tabBarIndicatorStyle: {
-                    display: 'none', // Убираем индикатор активной вкладки
+                    display: 'none',
                 },
             }}
         >

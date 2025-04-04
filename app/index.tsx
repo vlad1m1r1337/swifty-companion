@@ -5,10 +5,10 @@ import {User} from "@/app/types/user";
 import {colors} from "@/app/constants";
 import {getUserData} from "@/app/requests";
 type IndexProps = {
-    user: User | undefined;
-    token: string | undefined;
-    setUser: (user: User | undefined) => void;
-    setToken: (token: string | undefined) => void;
+    user: User | null;
+    token: string | null;
+    setUser: (user: User | null) => void;
+    setToken: (token: string | null) => void;
 }
 
 export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
@@ -85,10 +85,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
+        paddingBottom: 50
     },
     userImg: {
-        width: 150,
-        height: 150,
+        width: 130,
+        height: 130,
         borderRadius: 20,
         borderColor: colors.primaryPurple,
         borderWidth: 2,

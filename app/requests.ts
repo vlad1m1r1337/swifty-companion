@@ -1,10 +1,9 @@
 import axios from "axios";
 import { User } from "@/app/types/user";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 
-
-// Сохранение данных
 export const storeData = async (key: string, value: string) => {
     try {
         await AsyncStorage.setItem(key, JSON.stringify(value));
@@ -13,7 +12,6 @@ export const storeData = async (key: string, value: string) => {
     }
 };
 
-// Получение данных
 const getData = async (key: string) => {
     try {
         const value = await AsyncStorage.getItem(key);
@@ -24,7 +22,6 @@ const getData = async (key: string) => {
 };
 
 
-// Функция для получения нового токена
 export async function getAccessToken() {
     const UID = process.env.EXPO_PUBLIC_CLIENT_ID;
     const SECRET = process.env.EXPO_PUBLIC_CLIENT_SECRET;
@@ -35,7 +32,7 @@ export async function getAccessToken() {
             client_secret: SECRET,
         });
         const token = response.data.access_token;
-        console.debug(token);
+//         console.debug(token);
         storeData('token', token);
     } catch (error) {
         console.error("Ошибка получения токена:", error);
@@ -43,7 +40,6 @@ export async function getAccessToken() {
     }
 }
 
-// Создаём экземпляр axios с автоматической подстановкой токена
 const apiClient = axios.create({
     baseURL: "https://api.intra.42.fr/v2",
 });
@@ -53,12 +49,12 @@ apiClient.interceptors.response.use(
     response => response,
     async (error) => {
         if (error.response?.status === 401) {
-            console.debug("Токен истёк, обновляем...");
+            // console.debug("Токен истёк, обновляем...");
             await getAccessToken();
             const newToken = await getData('token');
             if (newToken) {
                 error.config.headers["Authorization"] = `Bearer ${newToken}`;
-                return apiClient.request(error.config); // Повторяем запрос с новым токеном
+                return apiClient.request(error.config);
             }
         }
         return Promise.reject(error);
@@ -76,6 +72,6 @@ export async function getUserData(user: string): Promise<User | undefined> {
         });
         return response.data;
     } catch (error) {
-        console.error("Ошибка получения данных пользователя:", error);
+        Alert.alert('Ошибка', 'Пользователь не найден');
     }
 }

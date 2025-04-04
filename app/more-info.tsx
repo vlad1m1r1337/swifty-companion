@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ScrollView} from "react-native";
+import {View, Text, StyleSheet, ScrollView, useWindowDimensions} from "react-native";
 import {FC} from "react";
 import {User} from "@/app/types/user";
 import { Dimensions } from 'react-native';
@@ -7,11 +7,11 @@ import {Checkmark} from "@/app/assets/Checkmark";
 import {Fail} from "@/app/assets/Fail";
 
 type MoreInfoProps = {
-    user: User | undefined;
+    user: User | null;
 }
 
 export const MoreInfo: FC<MoreInfoProps> = ({user}) => {
-    const screenHeight = Dimensions.get('window').height;
+    const { width, height } = useWindowDimensions();
     return (
         <ScrollView contentContainerStyle={styles.container}>
             {user ? (
@@ -41,7 +41,7 @@ export const MoreInfo: FC<MoreInfoProps> = ({user}) => {
                     </>
                 </View>
             ) : (
-                <View style={{ flex: 1, backgroundColor: colors.primaryBackground, height: screenHeight }} />
+                <View style={{ flex: 1, backgroundColor: colors.primaryBackground, height: height }} />
                 )}
         </ScrollView>
     )
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primaryBackground,
         gap:10,
         paddingTop: 20,
-        paddingBottom: 20
+        paddingBottom: 60
     },
     skillInfo: {
         display: 'flex',
