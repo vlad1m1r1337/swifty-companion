@@ -35,6 +35,7 @@ export async function getAccessToken() {
             client_secret: SECRET,
         });
         const token = response.data.access_token;
+        console.debug(token);
         storeData('token', token);
     } catch (error) {
         console.error("Ошибка получения токена:", error);
@@ -52,7 +53,7 @@ apiClient.interceptors.response.use(
     response => response,
     async (error) => {
         if (error.response?.status === 401) {
-            console.log("Токен истёк, обновляем...");
+            console.debug("Токен истёк, обновляем...");
             await getAccessToken();
             const newToken = await getData('token');
             if (newToken) {
