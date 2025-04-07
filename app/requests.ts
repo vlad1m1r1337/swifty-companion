@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import { User } from "@/app/types/user";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
@@ -57,6 +57,12 @@ apiClient.interceptors.response.use(
                 return apiClient.request(error.config);
             }
         }
+        if (error.message === 'Network Error') {
+            Alert.alert('Ошибка', 'Нет интернета');
+        }
+        else {
+            Alert.alert('Ошибка', '');
+        }
         return Promise.reject(error);
     }
 );
@@ -64,6 +70,7 @@ apiClient.interceptors.response.use(
 // Функция для получения данных пользователя
 export async function getUserData(user: string): Promise<User | undefined> {
     const token = await getData('token');
+    console.log('mt', token);
     try {
         const response = await apiClient.get(`/users/${user}`, {
             headers: {
@@ -71,7 +78,9 @@ export async function getUserData(user: string): Promise<User | undefined> {
             },
         });
         return response.data;
-    } catch (error) {
-        Alert.alert('Ошибка', 'Пользователь не найден');
+    } catch (error: any) {
+        if (error.response?.status === 404) {
+            Alert.alert('Ошибка', 'Пользователь не найден');
+        }
     }
 }

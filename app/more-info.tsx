@@ -5,6 +5,7 @@ import { Dimensions } from 'react-native';
 import {colors} from "@/app/constants";
 import {Checkmark} from "@/app/assets/Checkmark";
 import {Fail} from "@/app/assets/Fail";
+import {cutString} from "@/app/cut-string";
 
 type MoreInfoProps = {
     user: User | null;
@@ -13,37 +14,40 @@ type MoreInfoProps = {
 export const MoreInfo: FC<MoreInfoProps> = ({user}) => {
     const { width, height } = useWindowDimensions();
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            {user ? (
-                <View style={{display: 'flex', gap: 10, backgroundColor: colors.primaryBackground, width: Dimensions.get('window').width * 0.75}}>
-                    <>
-                        <Text style={{color: colors.primaryPurple}} >Skills</Text>
-                        {user.cursus_users.at(1)?.skills?.map((skill, index) => (
-                            <View style={styles.skillInfo} key={skill.name}>
-                                <Text style={styles.name} >{skill.name}</Text>
-                                <Text>{(skill.level * 5).toFixed(2)}%</Text>
-                            </View>
-                        ))}
-                        <View
-                            style={{
-                                borderBottomColor: colors.primaryPurple,
-                                borderBottomWidth: 2,
-                            }}
-                        />
-                        <Text style={{color: colors.primaryPurple}} >Projects</Text>
-                        {user.projects_users.filter(el => el.status === "finished").map((project, index) => (
-                            <View style={styles.projectRow} key={project.project.name}>
-                                <Text style={styles.name} >{project.project.name}</Text>
-                                <Text style={styles.mark} >{project.final_mark}</Text>
-                                { project.final_mark ? <Checkmark/> : <Fail/>}
-                            </View>
-                        ))}
-                    </>
-                </View>
-            ) : (
-                <View style={{ flex: 1, backgroundColor: colors.primaryBackground, height: height }} />
+        <>
+            <ScrollView contentContainerStyle={styles.container}>
+                {user ? (
+                    <View style={{display: 'flex', gap: 10, backgroundColor: colors.primaryBackground, width: Dimensions.get('window').width * 0.75}}>
+                        <>
+                            <Text style={{color: colors.primaryPurple}} >Skills</Text>
+                            {user?.cursus_users.at(1)?.skills?.map((skill, index) => (
+                                <View style={styles.skillInfo} key={skill.name}>
+                                    <Text style={styles.name} >{skill.name}</Text>
+                                    <Text>{(skill.level * 5).toFixed(2)}%</Text>
+                                </View>
+                            ))}
+                            <View
+                                style={{
+                                    borderBottomColor: colors.primaryPurple,
+                                    borderBottomWidth: 2,
+                                }}
+                            />
+                            <Text style={{color: colors.primaryPurple}} >Projects</Text>
+                            {user.projects_users.filter(el => el.status === "finished").map((project, index) => (
+                                <View style={styles.projectRow} key={project.project.name}>
+                                    <Text style={styles.name} >{cutString(project.project.name)}</Text>
+                                    <Text style={styles.mark} >{project.final_mark}</Text>
+                                    { project.final_mark ? <Checkmark/> : <Fail/>}
+                                </View>
+                            ))}
+                        </>
+                    </View>
+                ) : (
+                    <View style={{ flex: 1, backgroundColor: colors.primaryBackground, height: height }} />
                 )}
-        </ScrollView>
+            </ScrollView>
+            {/*<View style={{minHeight: 50, backgroundColor: colors.primaryBackground,}} />*/}
+        </>
     )
 }
 
@@ -52,6 +56,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
+        flexGrow: 1,
         backgroundColor: colors.primaryBackground,
         gap:10,
         paddingTop: 20,

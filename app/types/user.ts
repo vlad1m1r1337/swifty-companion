@@ -1,5 +1,3 @@
-import names from "ajv/lib/compile/names";
-
 export interface User {
     id: number;
     email: string;

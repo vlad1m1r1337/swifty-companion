@@ -51,7 +51,7 @@ export default function RootLayout() {
                 )}
             </Tab.Screen>
             <Tab.Screen
-                name="MoreInfo"
+                name="Mor   eInfo"
                 options={{ tabBarLabel: "More Info", tabBarIcon: () => (<></>) }}
             >
                 {(props) => <MoreInfo {...props} user={user} />}

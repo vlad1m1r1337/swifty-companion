@@ -26,11 +26,13 @@ export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
 
     const isLandscape = screenDimensions.width > screenDimensions.height;
     const fetchUser = async () => {
+        if (!text.length) return
         const userData = await getUserData(text);
         if (userData) {
             setUser(userData);
         }
     };
+    console.log(user)
     return (
         <>
             <View
@@ -49,8 +51,8 @@ export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
                 {user && (
                         <View style={{...styles.fullInfo, flexDirection: isLandscape ? 'row' : 'column'}}>
                             <Image
-                                source={{ uri: user.image.link }}
-                                style={styles.userImg}
+                                source={{ uri: user?.image?.link }}
+                                style={styles?.userImg}
                             />
                             <View style={styles.info}>
                                 <View style={{marginRight: 10}}>
@@ -62,13 +64,13 @@ export const Index: FC<IndexProps> = ({ user, token, setUser, setToken }) => {
                                     <Text style={styles.infoTag}>Wallet</Text>
                                 </View>
                                 <View>
-                                    <Text style={styles.infoValue}>{user.usual_full_name}</Text>
-                                    <Text style={styles.infoValue}>{user.cursus_users[1].level}</Text>
-                                    <Text style={styles.infoValue}>{user.email}</Text>
-                                    <Text style={styles.infoValue}>{user.phone}</Text>
+                                    <Text style={styles.infoValue}>{user?.usual_full_name}</Text>
+                                    <Text style={styles.infoValue}>{user?.cursus_users[1]?.level}</Text>
+                                    <Text style={styles.infoValue}>{user?.email}</Text>
+                                    <Text style={styles.infoValue}>{user?.phone}</Text>
                                     {user?.location ? (<Text style={styles.infoValue} >{user?.location}</Text>) :
                                         (<Text style={styles.infoValue} >Location is unknown</Text>)}
-                                    <Text style={styles.infoValue} >{user.wallet}</Text>
+                                    <Text style={styles.infoValue} >{user?.wallet}</Text>
                                 </View>
                             </View>
                         </View>
